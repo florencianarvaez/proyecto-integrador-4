@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/tasks", "destination": "/" },
+    { "source": "/login", "destination": "/" },
+    { "source": "/register", "destination": "/" }
+  ]
+}
+
