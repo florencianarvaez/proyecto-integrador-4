@@ -1,6 +1,6 @@
 # Gestor Estratégico de Tareas
 
-SPA desarrollada como Proyecto Integrador 4 de MateCode para gestionar tareas personales.
+SPA desarrollada como Proyecto Integrador 4 para la gestión de tareas personales.
 
 Permite registrarse, iniciar sesión y administrar tareas privadas. Cada usuario puede crear, editar, completar y eliminar sus tareas, además de recibir un resumen por email mediante AWS SES.
 
