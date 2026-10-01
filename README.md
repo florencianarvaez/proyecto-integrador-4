@@ -1,81 +1,43 @@
 # Gestor Estratégico de Tareas
 
-Aplicación web SPA para la gestión de tareas personales, desarrollada como Proyecto Integrador 4 de MateCode.
+SPA desarrollada como Proyecto Integrador 4 de MateCode para gestionar tareas personales.
 
-La aplicación permite registrar usuarios, iniciar sesión y gestionar tareas de forma privada. Cada usuario puede crear, visualizar, editar, completar y eliminar sus propias tareas. También puede recibir por email un resumen de sus tareas mediante una integración con AWS SES.
+Permite registrarse, iniciar sesión y administrar tareas privadas. Cada usuario puede crear, editar, completar y eliminar sus tareas, además de recibir un resumen por email mediante AWS SES.
 
 ## Funcionalidades
 
-- Registro de usuarios con email y contraseña.
-- Inicio y cierre de sesión.
-- Persistencia de la sesión.
-- Rutas privadas protegidas.
-- Creación de tareas.
-- Visualización de tareas por usuario.
-- Edición de tareas.
-- Eliminación de tareas.
-- Cambio de estado entre pendiente y completada.
-- Actualización de tareas en tiempo real con Firestore.
+- Registro, inicio y cierre de sesión.
+- Persistencia de sesión y rutas privadas.
+- CRUD completo de tareas.
+- Tareas independientes por usuario.
+- Actualización en tiempo real con Firestore.
 - Estados de carga y manejo de errores.
-- Envío por email de un resumen de tareas.
-- Interfaz responsive.
-- Tests de componentes con Vitest y React Testing Library.
+- Envío de resumen de tareas por email.
+- Diseño responsive.
+- Tests con Vitest y React Testing Library.
 
-## Tecnologías utilizadas
+## Tecnologías
 
-### Frontend
-
-- React
-- TypeScript
-- Vite
+- React + TypeScript + Vite
 - React Router DOM
-- CSS
-
-### Backend y servicios
-
 - Firebase Authentication
 - Cloud Firestore
-- AWS Simple Email Service (SES)
+- AWS SES
 - Vercel Functions
-
-### Testing
-
-- Vitest
-- React Testing Library
-- jest-dom
-- jsdom
+- Vitest + React Testing Library
 
 ## Arquitectura
-
-El proyecto separa las responsabilidades de la aplicación en diferentes directorios:
 
 ```text
 src/
 ├── components/
-│   ├── TodoForm.tsx
-│   └── TodoItem.tsx
-├── features/
-│   └── auth/
-│       └── AuthContext.tsx
+├── features/auth/
 ├── hooks/
-│   └── useTasks.ts
 ├── pages/
-│   ├── LoginPage.tsx
-│   ├── RegisterPage.tsx
-│   └── TasksPage.tsx
 ├── routes/
-│   └── ProtectedRoute.tsx
 ├── services/
-│   ├── authService.ts
-│   ├── emailService.ts
-│   ├── firebase.ts
-│   └── taskService.ts
 ├── tests/
-│   ├── setup.ts
-│   ├── TodoForm.test.tsx
-│   └── TodoItem.test.tsx
 ├── types/
-│   └── task.ts
 └── utils/
 
 api/
@@ -84,45 +46,15 @@ api/
 firestore.rules
 ```
 
-La lógica de acceso a Firebase se encuentra separada de los componentes visuales mediante servicios y hooks.
+La aplicación separa componentes, páginas, autenticación, servicios y acceso a datos.
 
-La autenticación global se administra mediante `AuthContext`, mientras que `ProtectedRoute` impide acceder a las páginas privadas cuando no existe un usuario autenticado.
+`AuthContext` administra el estado global de autenticación, `ProtectedRoute` protege las rutas privadas y `useTasks` obtiene en tiempo real las tareas del usuario autenticado.
 
-## Modelo de tareas
-
-Cada tarea contiene los siguientes datos:
-
-```ts
-interface Task {
-  id: string
-  userId: string
-  title: string
-  description: string
-  completed: boolean
-  createdAt: Timestamp
-  updatedAt: Timestamp
-}
-```
-
-El campo `userId` permite asociar cada tarea con el usuario que la creó.
-
-## Seguridad de Firestore
-
-Las reglas de Firestore verifican que exista un usuario autenticado y que el `userId` de la tarea coincida con su UID.
-
-De esta forma, cada usuario solamente puede acceder y modificar sus propias tareas.
-
-Las reglas utilizadas se encuentran en:
-
-```text
-firestore.rules
-```
+Firestore utiliza el `userId` de cada tarea para separar los datos por usuario. Las reglas de `firestore.rules` impiden que un usuario acceda o modifique tareas pertenecientes a otro usuario.
 
 ## Variables de entorno
 
-Crear un archivo `.env` en la raíz del proyecto tomando como referencia `.env.example`.
-
-Variables necesarias:
+Crear `.env` a partir de `.env.example`:
 
 ```env
 VITE_FIREBASE_API_KEY=
@@ -138,180 +70,89 @@ AWS_REGION=
 SES_FROM_EMAIL=
 ```
 
-Las credenciales reales no se incluyen en el repositorio.
-
-Las variables que comienzan con `VITE_` son utilizadas por el frontend para configurar Firebase.
-
-Las credenciales de AWS son utilizadas únicamente en el entorno del servidor mediante una Vercel Function y nunca se exponen en el código del frontend.
+Las credenciales reales no se incluyen en el repositorio. Las credenciales de AWS se utilizan únicamente desde la función serverless.
 
 ## Instalación
 
-Clonar el repositorio e instalar las dependencias:
-
 ```bash
 npm install
-```
-
-Crear el archivo `.env` y configurar las variables necesarias.
-
-Para iniciar solamente el frontend durante el desarrollo:
-
-```bash
 npm run dev
 ```
 
-Para ejecutar la aplicación junto con la función serverless de Vercel:
+Para ejecutar también la función de Vercel localmente:
 
 ```bash
 npx vercel dev
 ```
 
-## Autenticación
+## Envío de emails
 
-Firebase Authentication gestiona el registro, inicio de sesión y cierre de sesión mediante email y contraseña.
-
-`onAuthStateChanged` permite mantener sincronizado el estado de autenticación de la aplicación.
-
-Las rutas privadas están protegidas mediante el componente `ProtectedRoute`.
-
-## Firestore
-
-Las tareas se almacenan en la colección:
+El resumen de tareas se envía mediante el siguiente flujo:
 
 ```text
-tasks
-```
-
-Las consultas filtran los documentos mediante el `userId` del usuario autenticado.
-
-La aplicación utiliza `onSnapshot` para recibir los cambios de Firestore en tiempo real.
-
-## Envío de emails con AWS SES
-
-El frontend nunca accede directamente a las credenciales de AWS.
-
-El flujo utilizado es:
-
-```text
-Usuario
-   ↓
 React
-   ↓
+  ↓
 POST /api/send-summary
-   ↓
+  ↓
 Vercel Function
-   ↓
+  ↓
 AWS SES
-   ↓
-Email con resumen de tareas
+  ↓
+Email
 ```
 
-La función ubicada en `api/send-summary.ts` recibe el resumen de las tareas y utiliza AWS SES para realizar el envío.
+La función `api/send-summary.ts` utiliza las credenciales de AWS almacenadas como variables de entorno del servidor, evitando exponerlas en el frontend.
 
-Las credenciales de AWS se almacenan exclusivamente como variables de entorno del servidor.
-
-### AWS SES Sandbox
-
-Durante el desarrollo se utilizó AWS SES en su entorno de pruebas. Dependiendo del estado de la cuenta de SES, puede ser necesario que las direcciones de destino estén verificadas antes de poder recibir emails.
+Durante el desarrollo se utilizó AWS SES en entorno sandbox, por lo que pueden aplicarse restricciones sobre las direcciones de destino.
 
 ## Testing
 
-Los tests se ejecutan con:
+Ejecutar los tests con:
 
 ```bash
 npm test
 ```
 
-Actualmente se incluyen pruebas para componentes clave de la aplicación.
+El proyecto incluye tests de componentes para validar creación, edición, eliminación y cambio de estado de las tareas.
 
-Se utilizan mocks para evitar depender de Firebase durante los tests unitarios.
-
-Los tests comprueban, entre otros comportamientos:
-
-- Validación del formulario de creación.
-- Creación de tareas.
-- Renderizado de una tarea.
-- Cambio de estado de una tarea.
-- Eliminación de tareas.
-- Edición de tareas.
-
-## Build
-
-Para generar el build de producción:
+También se puede comprobar el proyecto con:
 
 ```bash
 npm run build
-```
-
-Para ejecutar el linter:
-
-```bash
 npm run lint
 ```
+
+Resultados finales:
+
+- 6 tests aprobados.
+- Build de producción correcto.
+- 0 errores de lint.
 
 ## Deploy
 
-La aplicación está preparada para desplegarse en Vercel.
+Aplicación desplegada en Vercel:
 
-URL de producción:
+https://proyecto-integrador-4-livid.vercel.app
 
-```text
-PENDIENTE - completar después del deploy
-```
-
-Las variables de entorno necesarias deben configurarse también en el proyecto de Vercel.
+Firebase, Firestore y el envío mediante AWS SES fueron verificados también en producción.
 
 ## Uso de Inteligencia Artificial
 
-Durante el desarrollo se utilizó ChatGPT como herramienta de apoyo.
+Durante el desarrollo se utilizó ChatGPT como herramienta de apoyo para:
 
-Se utilizó principalmente para:
-
-- Planificar la arquitectura inicial del proyecto.
-- Comprender la integración entre React, Firebase y Firestore.
-- Implementar y revisar el flujo de autenticación.
+- Planificar la arquitectura del proyecto.
+- Comprender e implementar Firebase Authentication y Firestore.
 - Estructurar el CRUD de tareas.
-- Comprender la integración entre AWS SES y Vercel Functions.
+- Integrar AWS SES mediante Vercel Functions.
 - Resolver errores de configuración.
-- Preparar tests con Vitest y React Testing Library.
-- Revisar la organización y documentación del proyecto.
+- Preparar tests y revisar la documentación.
 
 Ejemplos de consultas realizadas:
 
-- Cómo estructurar una SPA de gestión de tareas con React y TypeScript.
-- Cómo proteger rutas utilizando Firebase Authentication.
+- Cómo proteger rutas con Firebase Authentication.
 - Cómo filtrar tareas de Firestore por usuario.
-- Cómo enviar emails con AWS SES sin exponer las credenciales en el frontend.
-- Cómo utilizar mocks de servicios externos en Vitest.
+- Cómo enviar emails con AWS SES sin exponer credenciales.
+- Cómo realizar mocks de servicios externos con Vitest.
 
-Las respuestas generadas con IA fueron revisadas y validadas mediante pruebas manuales, ejecución de tests, compilación de TypeScript y verificación del funcionamiento de la aplicación.
-
-## Validaciones realizadas
-
-Se verificó manualmente:
-
-- Registro.
-- Inicio de sesión.
-- Cierre de sesión.
-- Persistencia de sesión.
-- Protección de rutas.
-- Creación de tareas.
-- Lectura de tareas.
-- Edición de tareas.
-- Eliminación de tareas.
-- Cambio de estado.
-- Separación de tareas por usuario.
-- Envío de resumen mediante AWS SES.
-
-También se verificó el proyecto mediante:
-
-```bash
-npm test
-npm run build
-npm run lint
-```
-
-## Estado del proyecto
-
-El proyecto implementa las funcionalidades principales solicitadas para el Gestor Estratégico de Tareas.
+Las respuestas generadas con IA fueron revisadas y validadas mediante pruebas manuales, tests y compilación del proyecto.
 
