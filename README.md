@@ -138,21 +138,22 @@ Firebase, Firestore y el envío mediante AWS SES fueron verificados también en 
 
 ## Uso de Inteligencia Artificial
 
-Durante el desarrollo se utilizó ChatGPT como herramienta de apoyo para:
+Durante el desarrollo se utilizó ChatGPT como herramienta de apoyo. La IA no se utilizó únicamente para generar código, sino principalmente para acompañar el proceso de planificación, implementación, resolución de errores y revisión del proyecto.
 
-- Planificar la arquitectura del proyecto.
-- Comprender e implementar Firebase Authentication y Firestore.
-- Estructurar el CRUD de tareas.
-- Integrar AWS SES mediante Vercel Functions.
-- Resolver errores de configuración.
-- Preparar tests y revisar la documentación.
+Fue especialmente útil para:
 
-Ejemplos de consultas realizadas:
+- Definir la arquitectura inicial y separar responsabilidades entre componentes, páginas, servicios, hooks y rutas.
+- Comprender e implementar Firebase Authentication y la persistencia de sesión.
+- Organizar el CRUD de tareas y la sincronización en tiempo real con Firestore.
+- Implementar rutas privadas y manejar correctamente los estados de carga.
+- Integrar AWS SES mediante una Vercel Function sin exponer credenciales en el frontend.
+- Resolver errores encontrados durante el desarrollo, testing y deploy.
+- Preparar tests con Vitest y React Testing Library.
+- Revisar la documentación y comprobar los requisitos antes de la entrega.
 
-- Cómo proteger rutas con Firebase Authentication.
-- Cómo filtrar tareas de Firestore por usuario.
-- Cómo enviar emails con AWS SES sin exponer credenciales.
-- Cómo realizar mocks de servicios externos con Vitest.
+La IA resultó más efectiva cuando las consultas incluían un objetivo concreto, el código involucrado y el error obtenido. Trabajar de forma iterativa permitió implementar una funcionalidad, probarla y utilizar los resultados de esas pruebas para ajustar la solución antes de continuar.
 
-Las respuestas generadas con IA fueron revisadas y validadas mediante pruebas manuales, tests y compilación del proyecto.
+A partir de este proceso se reforzaron buenas prácticas como separar la lógica de negocio de la interfaz, utilizar variables de entorno para información sensible, proteger los datos mediante reglas de Firestore, filtrar la información por usuario, limpiar las suscripciones en los hooks y mantener las integraciones que utilizan credenciales del lado del servidor.
+
+Las respuestas generadas por IA fueron utilizadas como orientación y revisadas mediante pruebas manuales, tests, compilación de TypeScript y verificación del funcionamiento de la aplicación en producción.
 
